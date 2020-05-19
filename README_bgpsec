@@ -1,0 +1,31 @@
+
+1. BGPSec Options in configuration
+-----------------------------------
+
+ under neighbor section, following options are set to configure BGPSec signing operation.
+
+    neighbor <ip-address> {
+        #======================= <BGPSec Options> =============================================
+        # enable bgpsec
+        bgpsec;
+
+        # to indicate direction in bgpsec OPEN capability : 0- receive, 1: send/receive both
+        bgpsec_send_receive 1;
+
+        # define a unique SKI value to determine its own key for signing
+        ski 492AAE72485D926CACDA2D259BE19DAE82DFBDE3;
+
+        # set NIST srxcrypto library location to link (below is the default location)
+        bgpsec_libloc /usr/lib64/srx/libSRxCryptoAPI.so;
+
+        # --------------------------------------------------------------------------------
+        # Multiple BGPSec Stacking (OPTIONAL setting)
+        #     bgpsec_pre_asns: previous ASNs in order of ASN-1 ASN-2 ... ASN-n(origin)
+        #     bgpsec_pre_skis: previous SKIs in accordance with pre_asns variable above
+        #  
+        #    (As the ASN is unique value, SKI should be unique on each AS)
+        # --------------------------------------------------------------------------------
+        # bgpsec_pre_asns 65002 65001;
+        # bgpsec_pre_skis 45CAD0AC44F77EFAA94602E9984305215BF47DCD EE503D669A374B729FE6F8F61B52A778F8A6CCE9;
+        #=================================================================================================
+    }

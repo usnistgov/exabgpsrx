@@ -1,0 +1,11 @@
+#!/bin/sh
+
+path="$(cd "$(dirname "$0")"/../.. ; pwd)"
+
+export PYTHONPATH=$path/lib
+
+for INTERPRETER in "$INTERPRETER" pypy python2.7 python2.6 python2 python; do
+	INTERPRETER="$(command -v "$INTERPRETER")" && break
+done
+
+exec "$INTERPRETER" -m exabgp.debug "$@"

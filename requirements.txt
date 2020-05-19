@@ -1,0 +1,4 @@
+# ExaBGP dependencies are included in its code tree
+# You only need to install the following for healthcheck.py
+
+ipaddr
