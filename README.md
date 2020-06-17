@@ -39,10 +39,8 @@ following command.
 cd srx-crypto-api
 ./configure --prefix=<Dir/to/install> CFLAGS="-O0 -g"
 ```
-<br>
 For more information such as key generation for signing and etc,
 please refer to [NIST SRxCryptoAPI](https://github.com/usnistgov/NIST-BGP-SRx/tree/master/srx-crypto-api) page.
-<br>
 
 
 ### Running Exabgpsec
