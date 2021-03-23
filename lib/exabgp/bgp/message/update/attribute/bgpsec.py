@@ -61,8 +61,8 @@ class BGPSEC (Attribute):
         self.logger = Logger()
 
         if nlri:
-            self.nlri_ip = nlri[(1,1)][1][0].cidr.top()  # nlri[(ipv4=1,uincast=1)][action=1 (ANNOUCE)]: [exabgp.bgp.message.update.nlri.inet.INET]
-            self.nlri_mask = nlri[(1,1)][1][0].cidr.mask
+            self.nlri_ip = nlri.cidr.top()  # nlri[(ipv4=1,uincast=1)][action=1 (ANNOUCE)]: [exabgp.bgp.message.update.nlri.inet.INET]
+            self.nlri_mask = nlri.cidr.mask
         else:
             return None
 

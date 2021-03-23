@@ -122,7 +122,10 @@ class Update (Message):
 		if not nlris and not mp_nlris:
 			return
 
-		attr = self.attributes.pack(negotiated, True, mp_nlris)
+        if hasattr(negotiated.neighbor,'bgpsec') and negotiated.neighbor.bgpsec :
+            mp_nlris_values = mp_nlris.values()
+            for mp_nlri in list(mp_nlris_values)[0].get(OUT.ANNOUNCE, []) :
+                attr = self.attributes.pack(negotiated, True, mp_nlri)
 
 		# Withdraws/NLRIS (IPv4 unicast and multicast)
 		msg_size = negotiated.msg_size - 19 - 2 - 2 - len(attr)  # 2 bytes for each of the two prefix() header
@@ -139,6 +142,51 @@ class Update (Message):
 
 		withdraws = b''
 		announced = b''
+
+                for family in mp_nlris.keys():
+                    afi, safi = family
+                    mp_reach = b''
+                    mp_unreach = b''
+                    mp_announce = MPRNLRI(afi, safi, [mp_nlri])
+                    mp_withdraw = MPURNLRI(afi, safi, mp_nlris[family].get(OUT.WITHDRAW, []))
+
+                    for mprnlri in mp_announce.packed_attributes(negotiated, msg_size - len(withdraws + announced)):
+                        if mp_reach:
+                            yield self._message(Update.prefix(withdraws) + Update.prefix(attr + mp_reach) + announced)
+                            announced = b''
+                            withdraws = b''
+                        mp_reach = mprnlri
+
+                    if include_withdraw:
+                        for mpurnlri in mp_withdraw.packed_attributes(negotiated, msg_size - len(withdraws + announced + mp_reach)):
+                            if mp_unreach:
+                                yield self._message(Update.prefix(withdraws) + Update.prefix(attr + mp_unreach + mp_reach) + announced)
+                                mp_reach = b''
+                                announced = b''
+                                withdraws = b''
+                            mp_unreach = mpurnlri
+
+                    yield self._message(Update.prefix(withdraws) + Update.prefix(attr + mp_unreach + mp_reach) + announced)  # yield mpr/mpur per family
+                    withdraws = b''
+                    announced = b''
+
+        else :
+            attr = self.attributes.pack(negotiated, True)
+            # Withdraws/NLRIS (IPv4 unicast and multicast)
+            msg_size = negotiated.msg_size - 19 - 2 - 2 - len(attr)  # 2 bytes for each of the two prefix() header
+
+            if msg_size < 0:
+                # raise Notify(6,0,'attributes size is so large we can not even pack one NLRI')
+                Logger().critical('attributes size is so large we can not even pack one NLRI','parser')
+                return
+
+            if msg_size == 0 and (nlris or mp_nlris):
+                # raise Notify(6,0,'attributes size is so large we can not even pack one NLRI')
+                Logger().critical('attributes size is so large we can not even pack one NLRI','parser')
+                return
+
+            withdraws = b''
+            announced = b''
 		for nlri in nlris:
 			packed = nlri.pack(negotiated)
 			if len(announced + withdraws + packed) <= msg_size:
