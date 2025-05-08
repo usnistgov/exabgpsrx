@@ -130,7 +130,19 @@ srxCryptoInit return value 1 (API_SUCCESS:1 or API_FAILURE:0)
 </br></br>
 
 ## With Docker
-**TBD**
+- building a docker image 
+```bash
+docker build -t < image name >[:version] .
+```
+
+- running example
+```bash
+ docker run --rm -it -p 179:179  [--network=host] \
+       -v /path/to/config/exabgp.docker.conf:/etc/exabgp.conf \
+       -v /path/to/keys:/var/lib/bgpsec-keys \
+       exabgpsec \
+       [env exabgp.daemon.user=root ./sbin/exabgp /etc/exabgp.conf] [--debug]
+```
 </br></br>
 
 
